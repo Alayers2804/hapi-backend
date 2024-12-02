@@ -1,0 +1,32 @@
+{
+  "name": "cc-api",
+  "version": "1.0.0",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start-dev": "nodemon ./src/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@google-cloud/firestore": "^7.10.0",
+    "@hapi/hapi": "^21.3.12",
+    "@hapi/inert": "^7.1.0",
+    "@hapi/joi": "^17.1.1",
+    "@hapi/jwt": "^3.2.0",
+    "axios": "^1.7.8",
+    "bcrypt": "^5.1.1",
+    "dotenv": "^16.4.5",
+    "firebase": "^11.0.2",
+    "firebase-admin": "^13.0.1",
+    "form-data": "^4.0.1",
+    "google-auth-library": "^9.15.0",
+    "hapi-auth-jwt2": "^10.7.0",
+    "jsonwebtoken": "^9.0.2",
+    "multiparty": "^4.2.3",
+    "nodemon": "^3.1.7"
+  }
+}
