@@ -1,7 +1,9 @@
 import { getUserById, getUsers, addUsers } from "../controller/userController.js";
-import { signInUsers, signUpUsers } from "../controller/authController.js";
-import uploadController from "../controller/mlController.js";
+import { signInUsers, signUpUsers,getRefreshToken } from "../controller/authController.js";
+import { getProfile, updateProfile } from "../controller/profileController.js";
+import { uploadImage, getHistory } from "../controller/mlController.js";
 import Joi from '@hapi/joi';
+
 
 
 
@@ -33,8 +35,23 @@ export const routesPlugin = [{
     handler:signUpUsers
 },
 {
+    method:'POST',
+    path:"/users/refreshToken",
+    handler:getRefreshToken
+},
+{
+    method:'POST',
+    path:"/users/getProfile",
+    handler:getProfile
+},
+{
+    method:'POST',
+    path:"/users/updateProfile",
+    handler:updateProfile
+},
+{
     method: 'POST',
-    path: '/upload',
+    path: '/machine-learning/upload',
     options: {
         validate: {
             payload: Joi.object({
@@ -48,7 +65,12 @@ export const routesPlugin = [{
             multipart: true
         },
     },
-    handler: uploadController.getPrediction,
+    handler: uploadImage.getPrediction,
+},
+{
+    method:'GET',
+    path:'/machine-learning/history',
+    handler:getHistory,
 },
 {
     method: 'GET',

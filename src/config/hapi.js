@@ -9,7 +9,6 @@ const createServer = async () => {
         host: "0.0.0.0",
     });
 
-   
     server.route(routes);
     await server.register(Inert);
     server.validator(Joi);

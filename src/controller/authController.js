@@ -87,6 +87,46 @@ const signUpUsers = async (request, h) => {
     }
 }
 
+const getRefreshToken = async (request, h) => {
+
+    const { grant_type = "refresh_token", refresh_token } = request.payload;
+
+    try {
+        const data = {
+            grant_type: grant_type,
+            refresh_token: refresh_token
+        }
+
+        const response = await authenticationAPI.refreshToken(data)
+        
+
+        return h.response({
+            expires_in : response.data.expires_in,
+            token_type : response.data.token_type,
+            refresh_token : response.data.refresh_token,
+            id_token : response.data.id_token,
+            user_id:response.data.user_id,
+            project_id : response.data.project_id
+        })
+
+    } catch (error) {
+
+        console.error("Error getting refresh token", error.response?.data || error.message);
+
+        // Customize the error response
+        const statusCode = error.response?.status || 500;
+        const errorDetails = error.response?.data?.error?.message || error.message;
+
+        return h.response({
+            error: "Error getting refresh token",
+            statusCode,
+            details: errorDetails,
+        }).code(statusCode);
+
+    }
+}
 
 
-export { signInUsers, signUpUsers };
+
+
+export { signInUsers, signUpUsers, getRefreshToken };
