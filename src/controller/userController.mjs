@@ -1,4 +1,4 @@
-import { firestoreAPI } from "../config/api.js";
+import { firestoreAPI } from "../config/api.mjs";
 
 const getUsers = async (request, h) => {
     try {

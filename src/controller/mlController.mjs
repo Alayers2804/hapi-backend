@@ -1,4 +1,4 @@
-import { machineLearningAPI } from "../config/api.js";
+import { machineLearningAPI } from "../config/api.mjs";
 import FormData from "form-data";
 import fs from "fs";
 import * as cheerio from 'cheerio';

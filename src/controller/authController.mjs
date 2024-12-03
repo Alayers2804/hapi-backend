@@ -1,4 +1,4 @@
-import { authenticationAPI } from "../config/api.js";
+import { authenticationAPI } from "../config/api.mjs";
 
 const signInUsers = async (request, h) => {
     const { email, password, loginMethod = "email" } = request.payload;

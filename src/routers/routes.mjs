@@ -1,7 +1,7 @@
-import { getUserById, getUsers, addUsers } from "../controller/userController.js";
-import { signInUsers, signUpUsers,getRefreshToken } from "../controller/authController.js";
-import { getProfile, updateProfile } from "../controller/profileController.js";
-import { uploadImage, getHistory } from "../controller/mlController.js";
+import { getUserById, getUsers, addUsers } from "../controller/userController.mjs";
+import { signInUsers, signUpUsers,getRefreshToken } from "../controller/authController.mjs";
+import { getProfile, updateProfile } from "../controller/profileController.mjs";
+import { uploadImage, getHistory } from "../controller/mlController.mjs";
 import Joi from '@hapi/joi';
 
 

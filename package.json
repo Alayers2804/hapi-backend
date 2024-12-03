@@ -2,17 +2,18 @@
   "name": "cc-api",
   "version": "1.0.0",
   "main": "server.js",
-  "type": "module",
   "scripts": {
-    "start-dev": "nodemon ./src/server.js",
+    "start-dev": "nodemon src/server.mjs",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ./src/server.js"
+    "start": "npm run build && node src/server.js",
+    "build": "babel src -d dist"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@google-cloud/firestore": "^7.10.0",
     "@hapi/hapi": "^21.3.12",
     "@hapi/inert": "^7.1.0",
     "@hapi/joi": "^17.1.1",
@@ -21,10 +22,18 @@
     "bcrypt": "^5.1.1",
     "cheerio": "^1.0.0",
     "dotenv": "^16.4.5",
+    "firebase": "^11.0.2",
+    "firebase-admin": "^13.0.1",
     "form-data": "^4.0.1",
+    "google-auth-library": "^9.15.0",
     "hapi-auth-jwt2": "^10.7.0",
     "jsonwebtoken": "^9.0.2",
     "multiparty": "^4.2.3",
     "nodemon": "^3.1.7"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.25.9",
+    "@babel/core": "^7.26.0",
+    "@babel/preset-env": "^7.26.0"
   }
 }

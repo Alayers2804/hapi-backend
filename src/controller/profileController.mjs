@@ -1,4 +1,4 @@
-import { profileAPI } from "../config/api.js";
+import { profileAPI } from "../config/api.mjs";
 
 const updateProfile = async (request, h) => {
 

@@ -1,12 +1,12 @@
 import Hapi from '@hapi/hapi';
 import Joi from '@hapi/joi';
 import Inert from '@hapi/inert';
-import routes from '../routers/routes.js';
+import routes from '../routers/routes.mjs';
 
 const createServer = async () => {
     const server = Hapi.server({
-        port: process.env.PORT || 3000,
-        host: "localhost",
+        port: process.env.PORT || 8080,
+        host: "0.0.0.0",
     });
 
     server.route(routes);

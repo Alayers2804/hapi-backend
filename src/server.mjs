@@ -1,5 +1,5 @@
-import dotenv from 'dotenv'; // Use import for ESM
-import createServer from './config/hapi.js'; // Use `.js` extension for ESM
+import dotenv from 'dotenv';
+import createServer from './config/hapi.mjs'; 
 
 // Load environment variables
 dotenv.config();
