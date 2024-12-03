@@ -85,6 +85,4 @@ const getProfile = async (request, h) => {
 
 }
 
-
-
 export { getProfile, updateProfile };

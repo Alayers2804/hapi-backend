@@ -40,14 +40,14 @@ const getUserById = async (request, h) => {
 
 const addUsers = async (request, h) => {
     try {
-        const { Email, Name, Phone, Photo } = request.payload;
+        const { email, name, phone, photo } = request.payload;
 
         const data = {
             fields: {
-                Email: { stringValue: Email },
-                Name: { stringValue: Name },
-                Phone: { stringValue: Phone },
-                Photo: { stringValue: Photo },
+                Email: { stringValue: email },
+                Name: { stringValue: name },
+                Phone: { stringValue: phone },
+                Photo: { stringValue: photo },
             },
         };
 
@@ -61,7 +61,7 @@ const addUsers = async (request, h) => {
 
         return h.response({
             message: 'Data added successfully',
-            documentPath: response.data.name, 
+            documentPath: response.data.name
         }).code(201);
     } catch (error) {
         console.error('Error adding data:', error);

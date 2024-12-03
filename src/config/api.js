@@ -7,7 +7,7 @@ dotenv.config();
 const firestoreBaseURL = 'https://firestore.googleapis.com/v1';
 const authBaseURL = 'https://identitytoolkit.googleapis.com/v1/';
 const refreshTokenURL = 'https://securetoken.googleapis.com/v1/token'
-const machineLearningURL = "https://ml-api-279551392308.asia-southeast1.run.app/predict_image";
+const machineLearningURL = process.env.MACHINE_LEARNING_URL;
 
 const projectId = process.env.FIREBASE_PROJECT_ID;
 const apiKey = process.env.FIREBASE_API_KEY
@@ -38,7 +38,7 @@ const machineLearningAPI = {
             ...data.getHeaders(),
         }
     }),
-    storeHistory : (data) => axios.post(`${firestoreBaseURL}/projects/${projectId}/databases/(default)/documents/${usersCollection}`, data),
+    storeHistory : (data) => axios.post(`${firestoreBaseURL}/projects/${projectId}/databases/(default)/documents/${historyCollection}`, data),
     getHistory: () => axios.get(`${firestoreBaseURL}/projects/${projectId}/databases/(default)/documents/${historyCollection}`),
 
 };
