@@ -38,12 +38,12 @@ const uploadImage = {
           GenText: { stringValue: response.data.data.GenText},
           predict_time: {
             doubleValue: parseFloat(response.data.data.predict_time),
-          }, // Use `doubleValue` for numbers
+          }, 
           predicted_class: { stringValue: response.data.data.predicted_class },
           confidence: {
             doubleValue: parseFloat(response.data.data.confidence),
-          }, // Use `doubleValue` for numbers
-          timestamp: { timestampValue: new Date().toISOString() }, // Use ISO string for timestamp
+          }, 
+          timestamp: { timestampValue: new Date().toISOString() }, 
         },
       };
 
@@ -81,54 +81,6 @@ const uploadImage = {
     }
   },
 };
-
-// function parseGenText(htmlContent) {
-//     const $ = cheerio.load(htmlContent);
-  
-//     // Extract the title
-//     const title = $("h2").first().text();
-  
-//     // Extract the summary
-//     const summary = $("p").first().text();
-  
-//     // Extract process list
-//     const processes = [];
-//     $("ul:first-of-type > li").each((i, el) => {
-//       processes.push($(el).text());
-//     });
-  
-//     // Extract ingredients and their details
-//     const ingredients = [];
-//     $("ul").each((i, ul) => {
-//       const ingredientName = $(ul).prev("strong").text();
-//       if (ingredientName) {
-//         const emissions = {};
-//         $(ul)
-//           .find("li")
-//           .each((j, li) => {
-//             const [key, value] = $(li).text().split(": ");
-//             if (key && value) {
-//               emissions[key] = parseFloat(value) || value.trim();
-//             }
-//           });
-//         ingredients.push({ name: ingredientName, emissions });
-//       }
-//     });
-  
-//     // Extract recommendations
-//     const recommendations = [];
-//     $("ul:last-of-type > li").each((i, el) => {
-//       recommendations.push($(el).text());
-//     });
-  
-//     return {
-//       title,
-//       summary,
-//       processes,
-//       ingredients,
-//       recommendations
-//     };
-//   }
 
 const getHistory = async (request, h) => {
   try {

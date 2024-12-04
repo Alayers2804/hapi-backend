@@ -1,88 +1,114 @@
-import { profileAPI } from "../config/api.mjs";
+import { authenticationAPI, profileAPI } from "../config/api.mjs";
+import { getIdToken, setTokens } from "../util/tokenStore.mjs";
 
 const updateProfile = async (request, h) => {
+  const { id, name, photoUrl } = request.payload;
 
-    const { idToken, displayName, photoUrl } = request.payload
+  const idToken = getIdToken(id);
 
-    try {
+  console.log("idToken", idToken);
 
-        const data = {
-            idToken: idToken,
-            displayName: displayName,
-            photoUrl: photoUrl,
-            returnSecureToken: true
-        }
+  try {
+    const data = {
+      idToken: idToken,
+      displayName: name,
+      photoUrl: photoUrl,
+      returnSecureToken: true,
+    };
 
-        const response = await profileAPI.updateProfile(data)
+    const firestoreData = {
+      fields: {
+        name: { stringValue: name },
+        photoUrl: { stringValue: photoUrl },
+      },
+    };
 
-        console.log(response.data)
+    const authenticationResponse = await profileAPI.updateProfile(data);
 
-        return h.response({
-            email: response.data.email,
-            displayName: response.data.displayName,
-            photoUrl: response.data.photoUrl,
-            idToken: response.data.idToken,
-            refreshToken: response.data.refreshToken,
-            exipresIn: response.data.exipresIn
-        })
+    const updateFirestoreData = await profileAPI.updateData(id, firestoreData);
 
-    } catch (error) {
+    console.log("Authentication update response:", authenticationResponse.data);
 
-        console.error("Error getting data user", error.response?.data || error.message);
+    console.log("Firestore update response:", updateFirestoreData.data);
 
-        // Customize the error response
-        const statusCode = error.response?.status || 404;
-        const errorDetails = error.response?.data?.error?.message || error.message;
+    const updatedFields = updateFirestoreData.data.fields;
 
-        return h.response({
-            error: "Error getting data user",
-            statusCode,
-            details: errorDetails,
-        }).code(statusCode);
+    return h
+      .response({
+        email: authenticationResponse.data.email,
+        name: updatedFields.name.stringValue, // Extract name from Firestore fields
+        photoUrl: updatedFields.photoUrl.stringValue, // Extract photoUrl from Firestore fields
+      })
+      .code(200);
+  } catch (error) {
+    console.error(
+      "Error update data user",
+      error.response?.data || error.message
+    );
 
-    }
+    // Customize the error response
+    const statusCode = error.response?.status || 404;
+    const errorDetails = error.response?.data?.error?.message || error.message;
 
-}
-
+    return h
+      .response({
+        error: "Error updating data user",
+        statusCode,
+        details: errorDetails,
+      })
+      .code(statusCode);
+  }
+};
 
 const getProfile = async (request, h) => {
+  const { id } = request.payload;
 
-    const { idToken } = request.payload
-
-    try {
-
-        const response = await profileAPI.getUserData({idToken});
-
-        if (!response.data.users || response.data.users.length === 0) {
-            return h.response({ error: "No users found" }).code(404);
-        }
-
-        const user = response.data.users[0];
-
-        const userData = {
-            email: user.email,
-            displayName: user.displayName || "No display name provided",
-            photoUrl: user.photoUrl || "No photo URL provided",
-        };
-
-        return h.response(userData).code(200);
-
-    } catch (error) {
-
-        console.error("Error getting data user", error.response?.data || error.message);
-
-        // Customize the error response
-        const statusCode = error.response?.status || 404;
-        const errorDetails = error.response?.data?.error?.message || error.message;
-
-        return h.response({
-            error: "Error getting data user",
-            statusCode,
-            details: errorDetails,
-        }).code(statusCode);
-
+  try {
+    let idToken = getIdToken(id);
+    if (!idToken) {
+      return h.response({ error: "ID token not found" }).code(400); // Error if ID token is missing
     }
 
-}
+    const response = await profileAPI.getUserData({ idToken });
+
+    console.log("authentication response", response)
+
+    const firestoreResponse = await authenticationAPI.getUser(id);
+
+    console.log("firestore response", firestoreResponse)
+    
+    const userData = {
+      id: id,
+      emailVerified : response.data.users[0].emailVerified,
+      createdAt : response.data.users[0].createdAt,
+      validSince : response.data.users[0].validSince,
+      ...Object.keys(firestoreResponse.data.fields).reduce((acc, key) => {
+        acc[key] = firestoreResponse.data.fields[key].stringValue; // Convert Firestore fields format
+        return acc;
+      }, {}),
+    };
+
+    return h.response(userData).code(200);
+  } catch (error) {
+    console.error("Error getting data user:", error);
+
+    if (error.response) {
+      console.error("Response error data:", error.response.data);
+      console.error("Response error status:", error.response.status);
+    }
+
+    // Customize error response
+    const statusCode = error.response?.status || 500; // Default to 500 if no status is provided
+    const errorDetails = error.response?.data?.error?.message || error.message;
+
+    return h
+      .response({
+        error: "Error getting data user",
+        statusCode,
+        details: errorDetails,
+      })
+      .code(statusCode);
+  }
+};
 
 export { getProfile, updateProfile };

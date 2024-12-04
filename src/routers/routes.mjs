@@ -1,4 +1,4 @@
-import { getUserById, getUsers, addUsers } from "../controller/userController.mjs";
+// import { getUserById, getUsers, addUsers } from "../controller/userController.mjs";
 import { signInUsers, signUpUsers,getRefreshToken } from "../controller/authController.mjs";
 import { getProfile, updateProfile } from "../controller/profileController.mjs";
 import { uploadImage, getHistory } from "../controller/mlController.mjs";
@@ -7,23 +7,7 @@ import Joi from '@hapi/joi';
 
 
 
-export const routesPlugin = [{
-
-    method: 'GET',
-    path: '/users',
-    handler: getUsers,
-},
-{
-    method: 'POST',
-    path: '/users',
-    handler: addUsers,
-
-},
-{
-    method: 'GET',
-    path: `/users/{id}`,
-    handler: getUserById
-},
+export const routesPlugin = [
 {
     method:'POST',
     path:'/users/signin',
