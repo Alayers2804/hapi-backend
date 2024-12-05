@@ -1,5 +1,10 @@
 import { authenticationAPI } from "../config/api.mjs";
-import { setTokens, clearTokens, isTokenExpired, getIdToken } from "../util/tokenStore.mjs";
+import {
+  setTokens,
+  clearTokens,
+  isTokenExpired,
+  getIdToken,
+} from "../util/tokenStore.mjs";
 
 const signInUsers = async (request, h) => {
   const { email, password, loginMethod = "email" } = request.payload;
@@ -23,12 +28,41 @@ const signInUsers = async (request, h) => {
     // Call the authentication API with the resolved endpoint
     const response = await authenticationAPI.signIn(endpoint, data);
 
-    setTokens(
-      response.data.localId,
-      response.data.idToken,
-      response.data.refreshToken
-    );
+    try {
+      // Safely clear tokens
+      try {
+        clearTokens(response.data.localId);
+      } catch (clearError) {
+        console.warn(
+          "Failed to clear existing tokens:",
+          clearError.message || clearError
+        );
+        // You can choose to continue even if token clearing fails
+      }
 
+      // Safely set new tokens
+      try {
+        setTokens(
+          response.data.localId,
+          response.data.idToken,
+          response.data.refreshToken
+        );
+      } catch (setError) {
+        console.error(
+          "Failed to set new tokens:",
+          setError.message || setError
+        );
+        throw new Error("Critical error: Unable to update user tokens.");
+      }
+    } catch (tokenError) {
+      // Handle any error from clearing or setting tokens
+      return h
+        .response({
+          error: "Failed to handle authentication tokens",
+          details: tokenError.message || "Unknown error",
+        })
+        .code(500);
+    }
     // Return the successful response
     return h
       .response({
@@ -108,6 +142,7 @@ const signUpUsers = async (request, h) => {
     const customData = {
       fields: {
         email: { stringValue: email },
+        password : {stringValue: password},
         name: { stringValue: name },
         phoneNumber: { stringValue: phoneNumber },
         photoUrl: { stringValue: photoUrl },
@@ -136,11 +171,41 @@ const signUpUsers = async (request, h) => {
       }
     })();
 
-    setTokens(
-      response.data.localId,
-      response.data.idToken,
-      response.data.refreshToken
-    );
+    try {
+      // Safely clear tokens
+      try {
+        clearTokens(response.data.localId);
+      } catch (clearError) {
+        console.warn(
+          "Failed to clear existing tokens:",
+          clearError.message || clearError
+        );
+        // You can choose to continue even if token clearing fails
+      }
+
+      // Safely set new tokens
+      try {
+        setTokens(
+          response.data.localId,
+          response.data.idToken,
+          response.data.refreshToken
+        );
+      } catch (setError) {
+        console.error(
+          "Failed to set new tokens:",
+          setError.message || setError
+        );
+        throw new Error("Critical error: Unable to update user tokens.");
+      }
+    } catch (tokenError) {
+      // Handle any error from clearing or setting tokens
+      return h
+        .response({
+          error: "Failed to handle authentication tokens",
+          details: tokenError.message || "Unknown error",
+        })
+        .code(500);
+    }
 
     return h
       .response({
@@ -169,6 +234,31 @@ const signUpUsers = async (request, h) => {
         details: errorDetails,
       })
       .code(statusCode);
+  }
+};
+
+const signOutUsers = async (request, h) => {
+  const { id } = request.payload; // Assuming `userId` is sent in the request
+
+  try {
+    if(getIdToken(id) == "" || getIdToken(id) == null){
+        return h.response({message:"Not found, Please Log in first"}).code(404)
+    }
+    clearTokens(id);
+
+    // Optionally notify the server or perform any other cleanup actions
+    console.log(`User ${id} has been successfully signed out.`);
+
+    return h.response({ message: "Sign-out successful" }).code(200);
+  } catch (error) {
+    console.error("Error during sign-out:", error.message || error);
+
+    return h
+      .response({
+        error: "Failed to sign out",
+        details: error.message || error,
+      })
+      .code(500);
   }
 };
 
@@ -201,4 +291,4 @@ const getRefreshToken = async (userId) => {
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const phoneNumberRegex = /^\+?[0-9]{7,15}$/;
 
-export { signInUsers, signUpUsers, getRefreshToken };
+export { signInUsers, signUpUsers, getRefreshToken, signOutUsers };

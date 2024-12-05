@@ -4,9 +4,20 @@ import { getIdToken, setTokens } from "../util/tokenStore.mjs";
 const updateProfile = async (request, h) => {
   const { id, name, photoUrl } = request.payload;
 
-  const idToken = getIdToken(id);
+  let idToken = getIdToken(id);
+  if (idToken == "" || idToken == null) {
+    return h
+      .response({ error: "ID token not found, Please Login First" })
+      .code(401);
+  }
 
-  console.log("idToken", idToken);
+  if (name == null || name == "") {
+    return h.response({ error: "Please provide new name" }.code(400));
+  }
+
+  if (photoUrl == null || photoUrl == "") {
+    return h.response({ error: "Please provide new photo profile" });
+  }
 
   try {
     const data = {
@@ -23,13 +34,17 @@ const updateProfile = async (request, h) => {
       },
     };
 
+    const updateMaskFieldPaths = Object.keys(firestoreData.fields)
+      .map((key) => `updateMask.fieldPaths=${key}`)
+      .join("&");
+
     const authenticationResponse = await profileAPI.updateProfile(data);
 
-    const updateFirestoreData = await profileAPI.updateData(id, firestoreData);
-
-    console.log("Authentication update response:", authenticationResponse.data);
-
-    console.log("Firestore update response:", updateFirestoreData.data);
+    const updateFirestoreData = await profileAPI.updateData(
+      id,
+      firestoreData,
+      updateMaskFieldPaths
+    );
 
     const updatedFields = updateFirestoreData.data.fields;
 
@@ -65,23 +80,25 @@ const getProfile = async (request, h) => {
 
   try {
     let idToken = getIdToken(id);
-    if (!idToken) {
-      return h.response({ error: "ID token not found" }).code(400); // Error if ID token is missing
+    if (idToken == "" || idToken == null) {
+      return h
+        .response({ error: "ID token not found, Please Login First" })
+        .code(401);
     }
 
     const response = await profileAPI.getUserData({ idToken });
 
-    console.log("authentication response", response)
+    console.log("authentication response", response);
 
     const firestoreResponse = await authenticationAPI.getUser(id);
 
-    console.log("firestore response", firestoreResponse)
-    
+    console.log("firestore response", firestoreResponse);
+
     const userData = {
       id: id,
-      emailVerified : response.data.users[0].emailVerified,
-      createdAt : response.data.users[0].createdAt,
-      validSince : response.data.users[0].validSince,
+      emailVerified: response.data.users[0].emailVerified,
+      createdAt: response.data.users[0].createdAt,
+      validSince: response.data.users[0].validSince,
       ...Object.keys(firestoreResponse.data.fields).reduce((acc, key) => {
         acc[key] = firestoreResponse.data.fields[key].stringValue; // Convert Firestore fields format
         return acc;

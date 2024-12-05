@@ -1,11 +1,19 @@
 import { machineLearningAPI } from "../config/api.mjs";
 import FormData from "form-data";
 import fs from "fs";
-import * as cheerio from 'cheerio';
+import { getIdToken } from "../util/tokenStore.mjs";
+
 const uploadImage = {
   getPrediction: async (request, h) => {
     const file = request.payload.image;
-
+  
+    const {id} = request.payload;
+    
+    if (!getIdToken(id) || getIdToken(id) === "") {
+      return h
+        .response({ error: "Please sign in first to upload the image" })
+        .code(401);
+    }
     if (!file) {
       return h.response({ error: "Photo is required" }).code(400);
     }
@@ -35,15 +43,15 @@ const uploadImage = {
       // Step 2: Prepare Firestore data
       const data = {
         fields: {
-          GenText: { stringValue: response.data.data.GenText},
+          GenText: { stringValue: response.data.data.GenText },
           predict_time: {
             doubleValue: parseFloat(response.data.data.predict_time),
-          }, 
+          },
           predicted_class: { stringValue: response.data.data.predicted_class },
           confidence: {
             doubleValue: parseFloat(response.data.data.confidence),
-          }, 
-          timestamp: { timestampValue: new Date().toISOString() }, 
+          },
+          timestamp: { timestampValue: new Date().toISOString() },
         },
       };
 
@@ -58,7 +66,7 @@ const uploadImage = {
       // Step 4: Store in Firestore asynchronously
       (async () => {
         try {
-          const firestoreResponse = await machineLearningAPI.storeHistory(data);
+          const firestoreResponse = await machineLearningAPI.storeHistory(data, id);
           if (firestoreResponse.status !== 200) {
             console.error(
               "Error storing history:",
@@ -84,13 +92,27 @@ const uploadImage = {
 
 const getHistory = async (request, h) => {
   try {
-    const response = await machineLearningAPI.getHistory();
+    const { id } = request.payload;
+
+    if (!getIdToken(id) || getIdToken(id) === "") {
+      return h
+        .response({ error: "Please sign in first to get your detection history" })
+        .code(401);
+    }
+
+    const response = await machineLearningAPI.getHistory(id);
+
+    // Ensure that the response contains the expected documents array
+    if (!response.data || !response.data.documents) {
+      return h
+        .response({ error: "No history data found" })
+        .code(404);
+    }
 
     // Transform the Firestore document structure
     const historyCollection = response.data.documents.map((doc) => {
       const fields = doc.fields || {};
       return {
-        id: doc.name.split("/").pop(), // Extract Firestore document ID
         GenText: fields.GenText?.stringValue || null,
         predict_time: fields.predict_time?.doubleValue || null,
         predicted_class: fields.predicted_class?.stringValue || null,
@@ -104,6 +126,5 @@ const getHistory = async (request, h) => {
     return h.response({ error: "Failed to fetch data" }).code(500);
   }
 };
-
 
 export { uploadImage, getHistory };
